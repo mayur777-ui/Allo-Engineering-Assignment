@@ -1,0 +1,92 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+// model Product{
+//   id  String @id @default(cuid())
+//   product_name String @unique
+//   product_description String 
+//   product_img String
+// }
+
+// model WareHouse{
+//   id String @id @default((cuid()))
+
+// }
+
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  RELEASED
+}
+
+model Product {
+  id          String      @id @default(cuid())
+  name        String      @unique
+  description String?
+  image       String?
+
+  inventories Inventory[]
+
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model Warehouse {
+  id          String      @id @default(cuid())
+  name        String      @unique
+  location    String?
+
+  inventories Inventory[]
+
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model Inventory {
+  id             String        @id @default(cuid())
+
+  productId      String
+  warehouseId    String
+
+  totalStock     Int           @default(0)
+  reservedStock  Int           @default(0)
+
+  product         Product      @relation(fields: [productId], references: [id])
+  warehouse       Warehouse    @relation(fields: [warehouseId], references: [id])
+
+  reservations    Reservation[]
+
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@unique([productId, warehouseId])
+}
+
+model Reservation {
+  id             String              @id @default(cuid())
+
+  inventoryId    String
+
+  quantity       Int                 @default(1)
+
+  status         ReservationStatus   @default(PENDING)
+
+  expiresAt      DateTime
+
+  inventory       Inventory          @relation(fields: [inventoryId], references: [id])
+
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+}
