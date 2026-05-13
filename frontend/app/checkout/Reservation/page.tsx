@@ -89,9 +89,6 @@ export default function ReservationsPage() {
     const isExpired = (expiresAt: string) => {
       return new Date(expiresAt) < new Date();
     };
-    const pendingReservations = reservations.filter((reservation) => reservation.status === "PENDING");
-    const confirmedReservations = reservations.filter((reservation) => reservation.status === "CONFIRMED");
-    const releasedReservations = reservations.filter((reservation) => reservation.status === "RELEASED");
     if (loading) {
       return (
         <main className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-blue-50 px-4 py-10 sm:px-6 lg:px-8">
