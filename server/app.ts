@@ -1,13 +1,16 @@
 import express from "express";
-// import './jobs/ExpireyClear';
+import './jobs/ExpireyClear';
 import productRoute from './routes/product.route'
 import { configDotenv } from "dotenv";
+import cors from 'cors';
 const app = express()
 configDotenv();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
-
+app.use(cors({
+    origin:process.env.client_url
+}))
 app.use('/api', productRoute);
 
 app.listen(PORT, ()=>{

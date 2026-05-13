@@ -1,7 +1,5 @@
 import { Router } from "express";
-
-import {
-  CreateProduct,
+import {CreateProduct,
   createWareHouse,
   createInventory,
   getInventory,
@@ -9,18 +7,17 @@ import {
   reserveStock,
   confirmReservation,
   releaseReservation,
-} from "../controllers/product.controller";
-
+  getReservation,
+  getReservationById} from "../controllers/product.controller";
 const router = Router();
-
-
 router.post("/products",CreateProduct);
 router.get("/products",getInventory);
 router.post("/warehouses",createWareHouse);
 router.get("/warehouses",getWareHouse);
 router.post("/inventory",createInventory);
 router.post("/reservations",reserveStock);
+router.get("/reservations/:id",getReservationById);
 router.post("/reservations/:id/confirm",confirmReservation);
 router.post("/reservations/:id/release",releaseReservation);
-
+router.get("/Reservation", getReservation)
 export default router;
