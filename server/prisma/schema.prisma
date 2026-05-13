@@ -13,18 +13,6 @@ datasource db {
 }
 
 
-// model Product{
-//   id  String @id @default(cuid())
-//   product_name String @unique
-//   product_description String 
-//   product_img String
-// }
-
-// model WareHouse{
-//   id String @id @default((cuid()))
-
-// }
-
 enum ReservationStatus {
   PENDING
   CONFIRMED
