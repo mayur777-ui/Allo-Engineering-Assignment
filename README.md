@@ -67,13 +67,13 @@ cd ..
 ```
 DATABASE_URL=postgresql://user:password@host:5432/allohealth
 DIRECT_URL=postgresql://user:password@host:5432/allohealth
-PORT=3001
+PORT=8000
 client_url=http://localhost:3000
 ```
 
 **Frontend** (`frontend/.env.local`):
 ```
-NEXT_PUBLIC_API_BASE_URL=http://localhost:3001/api
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8001/api
 ```
 
 #### 3. Database Migrations
@@ -90,7 +90,7 @@ cd ..
 ```bash
 cd server
 npm run dev
-# Server runs on http://localhost:3001
+# Server runs on http://localhost:8000
 ```
 
 **Terminal 2 - Frontend**:
