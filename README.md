@@ -67,13 +67,13 @@ cd ..
 ```
 DATABASE_URL=postgresql://user:password@host:5432/allohealth
 DIRECT_URL=postgresql://user:password@host:5432/allohealth
-PORT=3001
+PORT=8000
 client_url=http://localhost:3000
 ```
 
 **Frontend** (`frontend/.env.local`):
 ```
-NEXT_PUBLIC_API_BASE_URL=http://localhost:3001/api
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8001/api
 ```
 
 #### 3. Database Migrations
@@ -90,7 +90,7 @@ cd ..
 ```bash
 cd server
 npm run dev
-# Server runs on http://localhost:3001
+# Server runs on http://localhost:8000
 ```
 
 **Terminal 2 - Frontend**:
@@ -249,16 +249,15 @@ const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
   - "Reserve" button with quantity input
 
 ### Checkout/Reservation Page (`app/reservation/[id]/page.tsx`)
-- Live countdown timer with 3 urgency levels
+- Live countdown timer
 - Reservation details (product, warehouse, quantity)
-- Status badge (PENDING: blue, CONFIRMED: green, RELEASED: red)
+- Status badge (PENDING, CONFIRMED, RELEASED)
 - "Confirm Purchase" button (disabled when expired)
 - "Cancel" button
 - Auto-refresh on 410 (expired) error
 - Success redirect after confirmation
 
 ### Reservations Dashboard (`app/checkout/Reservation/page.tsx`)
-- **Stats Cards**: Shows pending, confirmed, released counts
 - **PENDING Section** (Blue): 
   - Grid of cards with product, warehouse, quantity, countdown
   - "Complete Checkout" link for each
@@ -268,7 +267,6 @@ const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
   - Cancelled/expired reservations
 - **Empty State**: Friendly message to browse products
 - **Live Counters**: Countdown timers update in real-time
-
 ### Reusable Components
 - `Alert.tsx`: Success/error/info/warning notifications
 - `CountdownCell.tsx`: Table cell with live countdown + color coding
@@ -297,12 +295,11 @@ All errors are caught, displayed to user in Alert components, and never silently
 
 ## Trade-offs & Design Decisions
 
-### 1. Cron-Based Expiry vs. TTL/Scheduled Jobs
+### 1. Cron-Based Expiry 
 - **Chosen**: Cron job (every 60 seconds)
 - **Why**: Simple, no external dependencies, works with PostgreSQL
 - **Trade-off**: Up to 60-second latency before stock is released
-- **Alternative**: Redis with TTL or AWS Lambda would give instant cleanup but adds operational complexity
-
+  
 ### 2. Frontend Countdown vs. Server Verification
 - **Chosen**: Client-side `useCountdown` hook + server-side 410 response
 - **Why**: Great UX (immediate visual feedback), but server is source of truth
@@ -314,16 +311,6 @@ All errors are caught, displayed to user in Alert components, and never silently
 - **Why**: Guaranteed correctness, simpler to reason about
 - **Trade-off**: Blocking under high concurrency (slower latency)
 - **Alternative**: Version numbers + retry loop would be faster but more complex
-
-### 4. No Idempotency (Bonus Not Implemented)
-- **Why**: Out of scope for core feature
-- **How to add**: Redis cache with Idempotency-Key → store request hash + response
-- **Cost**: ~2 hours to implement fully with cache TTL and cleanup
-
-### 5. No User Authentication
-- **Why**: Assignment focused on inventory logic, not auth
-- **To add**: JWT middleware + middleware on routes
-- **Impact**: Each user can see all reservations (demo-only system)
 
 ## Data Model
 
@@ -424,51 +411,18 @@ npx prisma db seed
 ```
 
 ## Verification Checklist
+-  Data model with products, warehouses, inventory, reservations
+-  All 5 API endpoints implemented
+-  Race-condition-free concurrency (SELECT FOR UPDATE)
+-  Returns 409 on insufficient stock
+-  Returns 410 on expired reservation
+-  Product listing page with professional UI
+-  Checkout page with live countdown
+-  Confirm/cancel functionality
+-  Errors visible to user (not silent)
+-  State updates without page refresh
+-  TypeScript end-to-end (no `any`)
+-  Reservation expiry mechanism (cron job)
+-  Background job imported in app.ts
 
-- ✅ Data model with products, warehouses, inventory, reservations
-- ✅ All 5 API endpoints implemented
-- ✅ Race-condition-free concurrency (SELECT FOR UPDATE)
-- ✅ Returns 409 on insufficient stock
-- ✅ Returns 410 on expired reservation
-- ✅ Product listing page with professional UI
-- ✅ Checkout page with live countdown
-- ✅ Confirm/cancel functionality
-- ✅ Errors visible to user (not silent)
-- ✅ State updates without page refresh
-- ✅ TypeScript end-to-end (no `any`)
-- ✅ Reservation expiry mechanism (cron job)
-- ✅ Background job imported in app.ts
-- ✅ Build passes (5.1s Turbopack compile)
-
-## What's Not Included (But Could Be)
-
-1. **User Authentication** - Not required for assignment; add JWT middleware + /auth routes
-2. **Idempotency** (Bonus) - Redis-backed request deduplication
-3. **Email Notifications** - Confirm/expiry emails (add Nodemailer)
-4. **Payment Integration** - Stub in place of real Stripe/Razorpay
-5. **Analytics** - Reservation success rates, popular products
-6. **Mobile Optimization** - Works but not tested on small screens
-7. **Accessibility (a11y)** - No ARIA labels or keyboard navigation
-8. **Rate Limiting** - No per-user/IP rate limits on API
-9. **Audit Logging** - No history of who confirmed/released what
-
-## Support & Troubleshooting
-
-### "Cannot find module 'node-cron'" after deployment
-- Backend must run `npm install` with `node-cron` as dependency
-- Check `server/package.json` includes it
-
-### Countdown shows wrong time
-- Verify client system clock is within ±5 seconds of server
-- Frontend uses server's expiresAt timestamp, not client time
-
-### 409 errors when stock is available
-- Check: Inventory row is locked by another transaction
-- Solution: Transaction typically completes within seconds; retry request
-- Verify: availableStock + reservedStock = totalStock in database
-
-### ExpireyClear job not running
-- Verify it's imported in `server/app.ts` (not just defined)
-- Check server logs for cron schedule messages
-- Job runs in-process; if server restarts, cleanup pauses
 
