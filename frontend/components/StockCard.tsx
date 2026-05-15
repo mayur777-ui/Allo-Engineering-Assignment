@@ -4,11 +4,10 @@ import { useRouter } from "next/navigation";
 import { Alert } from "./Alert";
 
 
-const StockCard = ({inventoryId,warehouseName,stocks, onReservationComplete}:{
+const StockCard = ({inventoryId,warehouseName,stocks}:{
   warehouseName: string;
   stocks: number;
   inventoryId: string;
-  onReservationComplete?: () => void;
 })=>{
   const [quantity, setQuantity] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(false);
@@ -33,7 +32,6 @@ const StockCard = ({inventoryId,warehouseName,stocks, onReservationComplete}:{
       });
       if (response.data?.reservation?.id) {
         router.push(`/reservation/${response.data.reservation.id}`);
-        onReservationComplete?.();
       }
     } catch (error: any) {
       const errorMessage =

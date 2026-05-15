@@ -27,9 +27,9 @@ export default function Home() {
   useEffect(() => {
     fetchProducts();
   }, []); 
-  const handleReservationComplete = () => {
-    fetchProducts(); 
-  };
+  // const handleReservationComplete = () => {
+  //   fetchProducts(); 
+  // };
   if (loading) {
     return (
       <main className="min-h-screen bg-gray-100 flex items-center justify-center">
@@ -58,8 +58,7 @@ export default function Home() {
 
       <section className="max-w-7xl mx-auto px-6 py-10">
         {error && (
-          <Alert
-            type="error"
+          <Alert type="error"
             message={error}
             onClose={() => setError(null)}
           />
@@ -79,7 +78,7 @@ export default function Home() {
               <ProductCard
                 key={product.id}
                 product={product}
-                onReservationComplete={handleReservationComplete}
+                // onReservationComplete={handleReservationComplete}
               />
             ))}
           </div>

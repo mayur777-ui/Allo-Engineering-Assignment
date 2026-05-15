@@ -4,7 +4,6 @@ import prisma from "../prisma/client.prisma";
 import cron from "node-cron";
 
 cron.schedule("* * * * *", async () => {
-
   console.log(
     "Running reservation expiry cleanup..."
   );
@@ -46,8 +45,7 @@ cron.schedule("* * * * *", async () => {
                   ${lockedReservation.inventoryId}
                 FOR UPDATE
               `;
-            const inventory =
-              inventoryRows[0];
+            const inventory = inventoryRows[0];
             if (!inventory) {
               return;
             }

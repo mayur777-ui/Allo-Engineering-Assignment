@@ -99,7 +99,6 @@ export const createInventory = async (
           "Inventory already exists for this product and warehouse",
       });
     }
-
     const inventory =
       await prisma.inventory.create({
         data: {
@@ -262,24 +261,29 @@ export const confirmReservation = async(req: Request,res: Response) => {
       });
     }
     const confirmedReservation =await prisma.$transaction(async (tx) => {
-        const reservationRows = await tx.$queryRaw<any[]>`SELECT * FROM "Reservation" WHERE id = ${id} FOR UPDATE`;
-        const reservation = reservationRows[0];
-        if(!reservation){
+        const checkReservation = await tx.reservation.findUnique({
+          where: {id},
+        })
+        if(!checkReservation){
             throw new Error("RESERVATION_NOT_FOUND");
         }
-        if (reservation.status !== "PENDING"){
+        if (checkReservation.status !== "PENDING"){
           throw new Error("INVALID_RESERVATION_STATUS");
         }
-        if (new Date(reservation.expiresAt) < new Date()){
+        if (new Date(checkReservation.expiresAt) < new Date()){
           throw new Error("RESERVATION_EXPIRED");
         }
-        const inventoryRows = await tx.$queryRaw<any[]>`SELECT * FROM "Inventory" WHERE id = ${reservation.inventoryId} FOR UPDATE`;
+        const inventoryRows = await tx.$queryRaw<any[]>`SELECT * FROM "Inventory" WHERE id = ${checkReservation.inventoryId} FOR UPDATE`;
         const inventory =inventoryRows[0];
+        
         if (!inventory) {
           throw new Error(
             "INVENTORY_NOT_FOUND"
           );
         }
+        const reservationRows = await tx.$queryRaw<any[]>`SELECT * FROM "Reservation" WHERE id = ${id} FOR UPDATE`;
+        const reservation = reservationRows[0];
+    
         await tx.inventory.update({
           where:{
             id: inventory.id,

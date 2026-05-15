@@ -2,10 +2,10 @@ import StockCard from "./StockCard";
 import { Product }from "../types/inventory";
 import { useEffect } from "react";
 
-const ProductCard = ({product, onReservationComplete}:{product: Product; onReservationComplete?: () => void}) => {
-  useEffect(()=>{
-    console.log("from P card",product)
-  },[])
+const ProductCard = ({product}:{product: Product}) => {
+  // useEffect(()=>{
+  //   console.log("from P card",product)
+  // },[])
   return (
     <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow border border-gray-200 overflow-hidden">
       <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 border-b border-gray-200">
@@ -25,7 +25,7 @@ const ProductCard = ({product, onReservationComplete}:{product: Product; onReser
               key={stock.inventoryId}
               warehouseName={stock.warehousename}
               stocks={stock.stocks}
-              onReservationComplete={onReservationComplete}
+              // onReservationComplete={onReservationComplete}
             />
           ))}
         </div>
